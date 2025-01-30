@@ -1,0 +1,13 @@
+MyWindowsService/MSG00409.bin
+MyWindowsService/.vs
+x64/
+Debug/
+Release/
+MyWindowsService/MyWindowsService.vcxproj.user
+MyWindowsService/MyWindowsService.vcxproj.filters
+MyWindowsService/resource.h
+MyWindowsService/MyWindowsService.vcxproj
+MyWindowsService/MyWindowsServiceMessage.dll
+MyWindowsService/MyWindowsServiceMessage.h
+MyWindowsService/MyWindowsServiceMessage.rc
+MyWindowsService/MyWindowsServiceMessage.res
