@@ -9,9 +9,9 @@
 wchar_t* strServiceName = DEFAULT_SVCNAME;
 wchar_t* strServiceLabel = DEFAULT_SVCNAME;
 wchar_t strStartCommand[32767];
-wchar_t* strDefaultStartCommand = (LPWSTR)TEXT("cmd.exe /C .\\start.bat");
+wchar_t* strDefaultStartCommand = (LPWSTR)TEXT("cmd.exe /C .\\MWS_start.bat");
 wchar_t strStopCommand[32767];
-wchar_t* strDefaultStopCommand = (LPWSTR)TEXT("cmd.exe /C .\\stop.bat");
+wchar_t* strDefaultStopCommand = (LPWSTR)TEXT("cmd.exe /C .\\MWS_stop.bat");
 wchar_t strWorkingDirectory[MAX_PATH];
 wchar_t* strLogDirectory = (LPWSTR)TEXT(".");
 HANDLE hEventSource = NULL;
