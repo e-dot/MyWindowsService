@@ -9,10 +9,13 @@
 wchar_t* strServiceName = DEFAULT_SVCNAME;
 wchar_t* strServiceLabel = DEFAULT_SVCNAME;
 wchar_t strStartCommand[32767];
-wchar_t* strDefaultStartCommand = (LPWSTR)TEXT("cmd.exe /C .\\MWS_start.bat");
+wchar_t* strDefaultStartCommand1 = (LPWSTR)TEXT("cmd.exe /C ");
+wchar_t* strDefaultStartCommand2 = (LPWSTR)TEXT("_start.bat");
 wchar_t strStopCommand[32767];
-wchar_t* strDefaultStopCommand = (LPWSTR)TEXT("cmd.exe /C .\\MWS_stop.bat");
+wchar_t* strDefaultStopCommand1 = (LPWSTR)TEXT("cmd.exe /C ");
+wchar_t* strDefaultStopCommand2 = (LPWSTR)TEXT("_stop.bat");
 wchar_t strWorkingDirectory[MAX_PATH];
+wchar_t strExecutableName[MAX_PATH];
 wchar_t* strLogDirectory = (LPWSTR)TEXT(".");
 HANDLE hEventSource = NULL;
 std::wostream *pMyCout = &std::wcout;
@@ -42,24 +45,33 @@ VOID SvcReportEvent(LPTSTR);
 //
 int __cdecl _tmain(int argc, wchar_t* argv[])
 {
-  SERVICE_TABLE_ENTRY DispatchTable[] =
-  {
-      { strServiceName, (LPSERVICE_MAIN_FUNCTION)SvcMain },
-      { NULL, NULL }
-  };
   LogInfo(L"Start service..." << L'\n');
 
   // Load default configuration
   LogInfo(L"Load configuration..." << L'\n');
+  // Get current binary info (path and name)
+  GetCurrentExecutableDirectoryAndFileName(strWorkingDirectory, sizeof(strWorkingDirectory) / sizeof(wchar_t), strExecutableName, sizeof(strExecutableName) / sizeof(wchar_t));
+  LogInfo(TEXT("executableName = \"") << strExecutableName << TEXT("\"") << L'\n');
+  LogInfo(TEXT("workingDirectory = \"") << strWorkingDirectory << TEXT("\"") << L'\n');
+  // Build start command full path : part1 + working directory + service name + '_start.bat'
   strStartCommand[0] = _T('\0');
-  wcscpy_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strDefaultStartCommand);
+  wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strDefaultStartCommand1);
+  wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strWorkingDirectory);
+  wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strExecutableName);
+  wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strDefaultStartCommand2);
+  // Build stop command full path : part1 + working directory + service name + '_stop.bat'
   strStopCommand[0] = _T('\0');
-  wcscpy_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), strDefaultStopCommand);
+  wcscat_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), strDefaultStopCommand1);
+  wcscat_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), strWorkingDirectory);
+  wcscat_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), strExecutableName);
+  wcscat_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), strDefaultStopCommand2);
   // TODO Load configuration file
+
+  LogInfo(TEXT("startCommand = \"") << strStartCommand << TEXT("\"") << L'\n');
+  LogInfo(TEXT("stopCommand = \"") << strStopCommand << TEXT("\"") << L'\n');
 
   // Change working directory (to same path as executable, if not specified in configuration file)
   LogInfo(L"Change working directory..." << L'\n');
-  GetCurrentExecutableDirectory(strWorkingDirectory, sizeof(strWorkingDirectory) / sizeof(wchar_t));
   if (_wchdir((const wchar_t*)strWorkingDirectory)) {
     LogError(TEXT("chdir(\"") << strWorkingDirectory << TEXT("\") failed (") << GetLastError() << TEXT(")") << L'\n');
     return 1;
@@ -85,6 +97,11 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
   // This call returns when the service has stopped. 
   // The process should simply terminate when the call returns.
 
+  SERVICE_TABLE_ENTRY DispatchTable[] =
+  {
+      { strServiceName, (LPSERVICE_MAIN_FUNCTION)SvcMain },
+      { NULL, NULL }
+  };
   if (!StartServiceCtrlDispatcher(DispatchTable))
   {
     SvcReportEvent((LPWSTR)TEXT("StartServiceCtrlDispatcher"));
@@ -452,7 +469,7 @@ VOID SvcReportEvent(LPTSTR szFunction)
   }
 }
 
-const _TCHAR* GetDirectoryName(_TCHAR* strDirNameBuffer, size_t intDirNameBufferSize, const _TCHAR* strFullPathName, const _TCHAR cDirectorySeparator = _T('\\'))
+const _TCHAR* GetDirectoryName(_TCHAR* strDirNameBuffer, size_t intDirNameBufferSize, const _TCHAR* strFullPathName, const _TCHAR cDirectorySeparator)
 {
   const _TCHAR* strDirName = NULL;
 
@@ -482,15 +499,54 @@ const _TCHAR* GetDirectoryName(_TCHAR* strDirNameBuffer, size_t intDirNameBuffer
   return(strDirName);
 }
 
-const _TCHAR* GetCurrentExecutableDirectory(_TCHAR* strDirNameBuffer, size_t intDirNameBufferSize)
+const _TCHAR* GetFileName(_TCHAR* strExecutableFileNameBuffer, size_t intExecutableFileNameBufferSize, const _TCHAR* strFullPathName, const _TCHAR cDirectorySeparator, const _TCHAR cExtensionSeparator)
+{
+  const _TCHAR* strFileName = NULL;
+
+  if (strFullPathName != NULL)
+  {
+    // Search last folder separator in full path (reverse search)
+    const _TCHAR* strFileNameStart = _tcsrchr(strFullPathName, (int)cDirectorySeparator);
+    if (strFileNameStart == NULL)
+    {
+      // No separator found : use default binary name DEFAULT_SVCNAME
+      wcscpy_s(strExecutableFileNameBuffer, intExecutableFileNameBufferSize, DEFAULT_SVCNAME);
+      strFileName = strExecutableFileNameBuffer;
+    }
+    else
+    {
+      // Search last extension separator (dot = ".")
+      const _TCHAR *strFileExtension = _tcsrchr(strFullPathName, (int)cExtensionSeparator);
+      // Copy between last separator to last dot
+      size_t nFileNameSize = strFileExtension - strFileNameStart - 1;
+      if (nFileNameSize <= 0)
+      {
+        // Last dot is before last backslash : no extension in file name, copy up to the end of string
+        nFileNameSize = wcsnlen_s(strFileNameStart, intExecutableFileNameBufferSize);
+      }
+      if (nFileNameSize >= intExecutableFileNameBufferSize) {
+        nFileNameSize = intExecutableFileNameBufferSize - 1;
+      }
+      wcsncpy_s(strExecutableFileNameBuffer, intExecutableFileNameBufferSize, strFileNameStart + 1, nFileNameSize);
+      strExecutableFileNameBuffer[nFileNameSize + 1] = _T('\0');
+      strFileName = strExecutableFileNameBuffer;
+    }
+  }
+
+  return(strFileName);
+}
+
+const _TCHAR* GetCurrentExecutableDirectoryAndFileName(_TCHAR* strDirNameBuffer, size_t intDirNameBufferSize, _TCHAR* strExecutableFileNameBuffer, size_t intExecutableFileNameBufferSize)
 {
   const _TCHAR* strDirectory = _T(".\\");
+  const _TCHAR* strExecutable = _T("MyWindowsService.exe");
 
   _TCHAR strModuleFileName[MAX_PATH + 1];
   DWORD dwSize = GetModuleFileName(NULL, strModuleFileName, MAX_PATH);
   if (dwSize > 0)
   {
     strDirectory = GetDirectoryName(strDirNameBuffer, intDirNameBufferSize, strModuleFileName);
+    strExecutable = GetFileName(strExecutableFileNameBuffer, intExecutableFileNameBufferSize, strModuleFileName);
   }
 
   return(strDirectory);
