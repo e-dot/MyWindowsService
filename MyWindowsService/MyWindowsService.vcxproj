@@ -82,12 +82,22 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>COPY /Y $(MSBuildProjectDirectory)\MWS_*.bat $(OutDirFullPath)
-COPY /Y $(MSBuildProjectDirectory)\MWS_*.ps1 $(OutDirFullPath)
+      <Command>FOR %%F IN ($(MSBuildProjectDirectory)\*.bat $(MSBuildProjectDirectory)\*.ps1) DO (
+  ECHO COPY /Y "%%F" "$(OutDirFullPath)"
+  COPY /Y "%%F" "$(OutDirFullPath)"
+)
 </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>COPY /Y "$(TargetPath)" "$(TargetDir)MWS.exe"
+      <Command>IF NOT EXIST "$(MSBuildProjectDirectory)\build\$(Platform)" MKDIR "$(MSBuildProjectDirectory)\build\$(Platform)"
+ECHO Cleanup folder "$(MSBuildProjectDirectory)\build\$(Platform)"...
+ECHO DEL /Q "$(MSBuildProjectDirectory)\build\$(Platform)\*.*"
+DEL /Q "$(MSBuildProjectDirectory)\build\$(Platform)\*.*"
+ECHO Copying binaries to folder "$(MSBuildProjectDirectory)\build\$(Platform)"...
+XCOPY /Y/D/S "$(TargetDir)*.exe" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.bat" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.ps1" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.pdb" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -107,12 +117,22 @@ COPY /Y $(MSBuildProjectDirectory)\MWS_*.ps1 $(OutDirFullPath)
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>COPY /Y $(MSBuildProjectDirectory)\MWS_*.bat $(OutDirFullPath)
-COPY /Y $(MSBuildProjectDirectory)\MWS_*.ps1 $(OutDirFullPath)
+      <Command>FOR %%F IN ($(MSBuildProjectDirectory)\*.bat $(MSBuildProjectDirectory)\*.ps1) DO (
+  ECHO COPY /Y "%%F" "$(OutDirFullPath)"
+  COPY /Y "%%F" "$(OutDirFullPath)"
+)
 </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>COPY /Y "$(TargetPath)" "$(TargetDir)MWS.exe"
+      <Command>IF NOT EXIST "$(MSBuildProjectDirectory)\build\$(Platform)" MKDIR "$(MSBuildProjectDirectory)\build\$(Platform)"
+ECHO Cleanup folder "$(MSBuildProjectDirectory)\build\$(Platform)"...
+ECHO DEL /Q "$(MSBuildProjectDirectory)\build\$(Platform)\*.*"
+DEL /Q "$(MSBuildProjectDirectory)\build\$(Platform)\*.*"
+ECHO Copying binaries to folder "$(MSBuildProjectDirectory)\build\$(Platform)"...
+XCOPY /Y/D/S "$(TargetDir)*.exe" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.bat" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.ps1" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.pdb" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -128,12 +148,22 @@ COPY /Y $(MSBuildProjectDirectory)\MWS_*.ps1 $(OutDirFullPath)
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>COPY /Y $(MSBuildProjectDirectory)\MWS_*.bat $(OutDirFullPath)
-COPY /Y $(MSBuildProjectDirectory)\MWS_*.ps1 $(OutDirFullPath)
+      <Command>FOR %%F IN ($(MSBuildProjectDirectory)\*.bat $(MSBuildProjectDirectory)\*.ps1) DO (
+  ECHO COPY /Y "%%F" "$(OutDirFullPath)"
+  COPY /Y "%%F" "$(OutDirFullPath)"
+)
 </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>COPY /Y "$(TargetPath)" "$(TargetDir)MWS.exe"
+      <Command>IF NOT EXIST "$(MSBuildProjectDirectory)\build\$(Platform)" MKDIR "$(MSBuildProjectDirectory)\build\$(Platform)"
+ECHO Cleanup folder "$(MSBuildProjectDirectory)\build\$(Platform)"...
+ECHO DEL /Q "$(MSBuildProjectDirectory)\build\$(Platform)\*.*"
+DEL /Q "$(MSBuildProjectDirectory)\build\$(Platform)\*.*"
+ECHO Copying binaries to folder "$(MSBuildProjectDirectory)\build\$(Platform)"...
+XCOPY /Y/D/S "$(TargetDir)*.exe" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.bat" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.ps1" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.pdb" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -153,12 +183,22 @@ COPY /Y $(MSBuildProjectDirectory)\MWS_*.ps1 $(OutDirFullPath)
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>COPY /Y $(MSBuildProjectDirectory)\MWS_*.bat $(OutDirFullPath)
-COPY /Y $(MSBuildProjectDirectory)\MWS_*.ps1 $(OutDirFullPath)
+      <Command>FOR %%F IN ($(MSBuildProjectDirectory)\*.bat $(MSBuildProjectDirectory)\*.ps1) DO (
+  ECHO COPY /Y "%%F" "$(OutDirFullPath)"
+  COPY /Y "%%F" "$(OutDirFullPath)"
+)
 </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>COPY /Y "$(TargetPath)" "$(TargetDir)MWS.exe"
+      <Command>IF NOT EXIST "$(MSBuildProjectDirectory)\build\$(Platform)" MKDIR "$(MSBuildProjectDirectory)\build\$(Platform)"
+ECHO Cleanup folder "$(MSBuildProjectDirectory)\build\$(Platform)"...
+ECHO DEL /Q "$(MSBuildProjectDirectory)\build\$(Platform)\*.*"
+DEL /Q "$(MSBuildProjectDirectory)\build\$(Platform)\*.*"
+ECHO Copying binaries to folder "$(MSBuildProjectDirectory)\build\$(Platform)"...
+XCOPY /Y/D/S "$(TargetDir)*.exe" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.bat" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.ps1" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+XCOPY /Y/D/S "$(TargetDir)*.pdb" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -205,12 +245,12 @@ link -machine:$(LibrariesArchitecture) -dll -noentry -out:%(Filename).dll %(File
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="MWS_start.bat" />
-    <Text Include="MWS_stop.bat" />
+    <Text Include="start.bat" />
+    <Text Include="stop.bat" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="MWS_setup.bat" />
-    <None Include="MWS_stop.ps1" />
+    <None Include="setup.bat" />
+    <None Include="stop.ps1" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
