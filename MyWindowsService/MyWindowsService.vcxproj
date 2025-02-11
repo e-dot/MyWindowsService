@@ -209,6 +209,7 @@ link -machine:$(LibrariesArchitecture) -dll -noentry -out:%(Filename).dll %(File
     <Text Include="MWS_stop.bat" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MWS_setup.bat" />
     <None Include="MWS_stop.ps1" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
