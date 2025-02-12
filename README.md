@@ -7,7 +7,7 @@ A Windows Service is a program that starts automatically at boot. It can be stop
 
 # Install
 
-* Download the package (zip) :
+* Download the package (zip) : https://github.com/e-dot/MyWindowsService/raw/refs/heads/main/MyWindowsService/build/MyWindowsService-x64.zip
 
 * Unzip in a folder
 
