@@ -1,6 +1,10 @@
 # MyWindowsService (MWS)
 Binary utility to easily deploy windows services - no coding WIN32 API (e.g. for node.js programs)
 
+## What is a windows service?
+
+A Windows Service is a program that starts automatically at boot. It can be stopped, paused and restarted via a Windows API (https://learn.microsoft.com/en-us/windows/win32/services/service-functions). Writing a service requires the use a C/C++ API (or .NET) : it may be hard for scripting developers to write such code. MWS is a very simple wrapper for any Windows Service, e.g. programs written in NodeJS, Python, PHP...
+
 # Install
 
 * Execute as administrator :
