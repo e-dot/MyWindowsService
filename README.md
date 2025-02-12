@@ -7,6 +7,18 @@ A Windows Service is a program that starts automatically at boot. It can be stop
 
 # Install
 
+* Download the package (zip) :
+
+* Unzip in a folder
+
+* Rename the .exe to match you service name
+
+* Customize the `_start.bat` and `_stop.bat` program to start and stop you service
+  For example, if your service is implemented in NodeJS, you may use this in you `_start.bat` script :
+  ```
+  node myservice.js
+  ```
+
 * Execute as administrator :
 ```
 _setup.bat
