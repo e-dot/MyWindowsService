@@ -20,6 +20,8 @@ wchar_t* strLogDirectory = (LPWSTR)TEXT(".");
 HANDLE hEventSource = NULL;
 std::wostream *pMyCout = &std::wcout;
 std::wostream *pMyCerr = &std::wcerr;
+wchar_t strConfigurationFile[MAX_PATH];
+std::unordered_map<std::string, std::string> Configuration;
 
 SERVICE_STATUS          gSvcStatus;
 SERVICE_STATUS_HANDLE   gSvcStatusHandle;
@@ -53,6 +55,20 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
   GetCurrentExecutableDirectoryAndFileName(strWorkingDirectory, sizeof(strWorkingDirectory) / sizeof(wchar_t), strExecutableName, sizeof(strExecutableName) / sizeof(wchar_t));
   LogInfo(TEXT("executableName = \"") << strExecutableName << TEXT("\"") << L'\n');
   LogInfo(TEXT("workingDirectory = \"") << strWorkingDirectory << TEXT("\"") << L'\n');
+
+  // Build configuration file path
+  strConfigurationFile[0] = _T('\0');
+  wcscat_s(strConfigurationFile, sizeof(strConfigurationFile) / sizeof(wchar_t), strWorkingDirectory);
+  wcscat_s(strConfigurationFile, sizeof(strConfigurationFile) / sizeof(wchar_t), strExecutableName);
+  wcscat_s(strConfigurationFile, sizeof(strConfigurationFile) / sizeof(wchar_t), L".config");
+
+  // Load configuration file
+  std::ifstream configurationFile(strConfigurationFile);
+  if (!configurationFile.is_open()) {
+    LogError(TEXT("Can't open configuration file \"") << strConfigurationFile << TEXT("\") : ") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
+    return 1;
+  }
+
   // Build start command full path : part1 + working directory + '_start.bat'
   strStartCommand[0] = _T('\0');
   wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strDefaultStartCommand1);
@@ -71,7 +87,7 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
   // Change working directory (to same path as executable, if not specified in configuration file)
   LogInfo(L"Change working directory..." << L'\n');
   if (_wchdir((const wchar_t*)strWorkingDirectory)) {
-    LogError(TEXT("chdir(\"") << strWorkingDirectory << TEXT("\") failed (") << GetLastError() << TEXT(")") << L'\n');
+    LogError(TEXT("chdir(\"") << strWorkingDirectory << TEXT("\") failed (") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
     return 1;
   }
   LogInfo(TEXT("chdir(\"") << strWorkingDirectory << TEXT("\") : OK.") << L'\n');
@@ -124,7 +140,7 @@ VOID SvcInstall()
 
   if (!GetModuleFileName(NULL, szUnquotedPath, MAX_PATH))
   {
-    LogError(TEXT("Cannot install service (") << GetLastError() << L'\n');
+    LogError(TEXT("Cannot install service (") << CFormatMessage(GetLastError()).GetFullText() << L'\n');
     return;
   }
 
@@ -144,7 +160,7 @@ VOID SvcInstall()
 
   if (NULL == schSCManager)
   {
-    LogError(TEXT("OpenSCManager failed (") << GetLastError() << L'\n');
+    LogError(TEXT("OpenSCManager failed (") << CFormatMessage(GetLastError()).GetFullText() << TEXT(").") << L'\n');
     return;
   }
 
@@ -167,7 +183,7 @@ VOID SvcInstall()
 
   if (schService == NULL)
   {
-    LogError(TEXT("CreateService failed (") << GetLastError() << L'\n');
+    LogError(TEXT("CreateService failed (") << CFormatMessage(GetLastError()).GetFullText() << TEXT(").") << L'\n');
     CloseServiceHandle(schSCManager);
     return;
   }
@@ -280,7 +296,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
     )
   {
     DWORD dwCreateError = GetLastError();
-    LogError(TEXT("CreateProcess(\"") << strStartCommand << TEXT("\") failed (") << dwCreateError << TEXT(").") << L'\n');
+    LogError(TEXT("CreateProcess(\"") << strStartCommand << TEXT("\") failed (") << CFormatMessage(dwCreateError).GetFullText() << TEXT(").") << L'\n');
     ReportSvcStatus(SERVICE_STOPPED, dwCreateError, 0);
     return;
   }
@@ -321,7 +337,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
         }
       }
       else {
-        LogInfo(TEXT("Can't get exit code for service sub-process PID ") << pi.dwProcessId << TEXT(" (") << GetLastError() << L'\n');
+        LogInfo(TEXT("Can't get exit code for service sub-process PID ") << pi.dwProcessId << TEXT(" (") << CFormatMessage(GetLastError()).GetFullText() << L'\n');
       }
     }
     break;
@@ -337,7 +353,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 
       // Return value is invalid.
     default:
-      LogError(TEXT("Wait error: ") << GetLastError() << L'\n');
+      LogError(TEXT("Wait error: ") << CFormatMessage(GetLastError()).GetFullText() << L'\n');
     }
 
 
@@ -448,7 +464,7 @@ VOID SvcReportEvent(LPTSTR szFunction)
 
   if (NULL != hEventSource)
   {
-    StringCchPrintf(Buffer, 80, TEXT("%s failed with %d"), szFunction, GetLastError());
+    StringCchPrintf(Buffer, 80, TEXT("%s failed with %S"), szFunction, CFormatMessage(GetLastError()).GetFullText());
 
     lpszStrings[0] = strServiceName;
     lpszStrings[1] = Buffer;
@@ -572,7 +588,7 @@ DWORD CallStopCommand(DWORD dwRunningProcessId) {
     )
   {
     DWORD dwCreateError = GetLastError();
-    LogError(TEXT("CreateProcess(\"") << strStopCommand << TEXT("\") failed (") << dwCreateError << TEXT(").") << L'\n');
+    LogError(TEXT("CreateProcess(\"") << strStopCommand << TEXT("\") failed (") << CFormatMessage(dwCreateError).GetFullText() << TEXT(").") << L'\n');
     ReportSvcStatus(SERVICE_STOPPED, dwCreateError, 0);
     return dwCreateError;
   }
@@ -605,7 +621,7 @@ DWORD CallStopCommand(DWORD dwRunningProcessId) {
       }
     }
     else {
-      LogError(TEXT("Can't get exit code for service sub-process PID ") << pi.dwProcessId << TEXT("(") << GetLastError() << L'\n');
+      LogError(TEXT("Can't get exit code for service sub-process PID ") << pi.dwProcessId << TEXT("(") << CFormatMessage(GetLastError()).GetFullText() << L'\n');
     }
   }
   break;
@@ -618,7 +634,7 @@ DWORD CallStopCommand(DWORD dwRunningProcessId) {
 
     // Return value is invalid.
   default:
-    LogError(TEXT("Wait error: ") << GetLastError() << L'\n');
+    LogError(TEXT("Wait error: ") << CFormatMessage(GetLastError()).GetFullText() << L'\n');
   }
 
   // Close process and thread handles. 
