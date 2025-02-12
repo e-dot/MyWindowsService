@@ -17,6 +17,14 @@ You may also call `_setup.bat` via command line and provide parameters to automa
 CMD /C _setup.bat MYSERVICEPASSWORD MYSERVICELOGIN MYSERVICENAME MYSERVICELABEL
 ```
 
+This batch script is registering the binary utility as a service with [sc.exe](https://learn.microsoft.com/en-us/windows/win32/services/controlling-a-service-using-sc) :
+1. stop service (if running)
+2. delete service (if already installed)
+3. create service (register its binary utility)
+4. configure service to start automatically at boot
+5. configure service to restart twice in case of unexpected crash
+6. start service
+
 # FAQ
 
 # How do I run my service under the system account ?
@@ -32,3 +40,14 @@ You need to provide this specific login and password during setup, i.e. when cal
 ```
 CMD /C _setup.bat MYSERVICEPASSWORD MYSERVICELOGIN MYSERVICENAME MYSERVICELABEL
 ```
+
+# References
+
+* [Service Functions](https://learn.microsoft.com/en-us/windows/win32/services/service-functions)
+* [Controlling a service using sc](https://learn.microsoft.com/en-us/windows/win32/services/controlling-a-service-using-sc)
+* [sc commands](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc754599(v=ws.11))
+* [sc.exe query](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-query)
+* [sc.exe create](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-create)
+* [sc.exe config](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-config)
+* [se.exe start](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc742126(v=ws.11))
+* [se.exe stop](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc742107(v=ws.11))
