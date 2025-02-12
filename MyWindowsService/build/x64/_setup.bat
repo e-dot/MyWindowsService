@@ -45,8 +45,8 @@ IF "%SERVICE_LABEL%" == "" GOTO ASK_LABEL
 
 SET SERVICE_EXE=%SERVICE_PATH%%SERVICE_NAME%.exe
 IF NOT EXIST "%SERVICE_EXE%" GOTO EXE_NOT_FOUND
-IF NOT EXIST "%SERVICE_PATH%%SERVICE_NAME%_start.bat" GOTO START_BAT_NOT_FOUND
-IF NOT EXIST "%SERVICE_PATH%%SERVICE_NAME%_stop.bat" GOTO STOP_BAT_NOT_FOUND
+IF NOT EXIST "%SERVICE_PATH%_start.bat" GOTO START_BAT_NOT_FOUND
+IF NOT EXIST "%SERVICE_PATH%_stop.bat" GOTO STOP_BAT_NOT_FOUND
 
 ECHO [%TIME%] %~n0 : Installing service "%SERVICE_NAME%" ("%SERVICE_LABEL%") to run as %SERVICE_LOGIN% with password ***secret***...
 REM Stop service (if running - ignore errors)
@@ -83,9 +83,9 @@ ECHO [%TIME%] %~n0 : ERROR : executable file not found: "%SERVICE_EXE%" >&2
 EXIT /B 2
 
 :START_BAT_NOT_FOUND
-ECHO [%TIME%] %~n0 : ERROR : start command not found: "%SERVICE_PATH%%SERVICE_NAME%_start.bat" >&2
+ECHO [%TIME%] %~n0 : ERROR : start command not found: "%SERVICE_PATH%_start.bat" >&2
 EXIT /B 3
 
 :STOP_BAT_NOT_FOUND
-ECHO [%TIME%] %~n0 : ERROR : stop command not found: "%SERVICE_PATH%%SERVICE_NAME%_stop.bat" >&2
+ECHO [%TIME%] %~n0 : ERROR : stop command not found: "%SERVICE_PATH%_stop.bat" >&2
 EXIT /B 4

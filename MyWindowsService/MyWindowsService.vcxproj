@@ -245,12 +245,12 @@ link -machine:$(LibrariesArchitecture) -dll -noentry -out:%(Filename).dll %(File
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="start.bat" />
-    <Text Include="stop.bat" />
+    <Text Include="_start.bat" />
+    <Text Include="_stop.bat" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="setup.bat" />
-    <None Include="stop.ps1" />
+    <None Include="_setup.bat" />
+    <None Include="_stop.ps1" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

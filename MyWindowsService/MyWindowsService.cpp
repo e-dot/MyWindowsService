@@ -10,10 +10,10 @@ wchar_t* strServiceName = DEFAULT_SVCNAME;
 wchar_t* strServiceLabel = DEFAULT_SVCNAME;
 wchar_t strStartCommand[32767];
 wchar_t* strDefaultStartCommand1 = (LPWSTR)TEXT("cmd.exe /C ");
-wchar_t* strDefaultStartCommand2 = (LPWSTR)TEXT("start.bat");
+wchar_t* strDefaultStartCommand2 = (LPWSTR)TEXT("_start.bat");
 wchar_t strStopCommand[32767];
 wchar_t* strDefaultStopCommand1 = (LPWSTR)TEXT("cmd.exe /C ");
-wchar_t* strDefaultStopCommand2 = (LPWSTR)TEXT("stop.bat");
+wchar_t* strDefaultStopCommand2 = (LPWSTR)TEXT("_stop.bat");
 wchar_t strWorkingDirectory[MAX_PATH];
 wchar_t strExecutableName[MAX_PATH];
 wchar_t* strLogDirectory = (LPWSTR)TEXT(".");
@@ -53,12 +53,12 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
   GetCurrentExecutableDirectoryAndFileName(strWorkingDirectory, sizeof(strWorkingDirectory) / sizeof(wchar_t), strExecutableName, sizeof(strExecutableName) / sizeof(wchar_t));
   LogInfo(TEXT("executableName = \"") << strExecutableName << TEXT("\"") << L'\n');
   LogInfo(TEXT("workingDirectory = \"") << strWorkingDirectory << TEXT("\"") << L'\n');
-  // Build start command full path : part1 + working directory + 'start.bat'
+  // Build start command full path : part1 + working directory + '_start.bat'
   strStartCommand[0] = _T('\0');
   wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strDefaultStartCommand1);
   wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strWorkingDirectory);
   wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strDefaultStartCommand2);
-  // Build stop command full path : part1 + working directory + 'stop.bat'
+  // Build stop command full path : part1 + working directory + '_stop.bat'
   strStopCommand[0] = _T('\0');
   wcscat_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), strDefaultStopCommand1);
   wcscat_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), strWorkingDirectory);
