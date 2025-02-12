@@ -3,8 +3,15 @@ Binary utility to easily deploy windows services - no coding WIN32 API (e.g. for
 
 # Install
 
-Execute as administrator :
+* Execute as administrator :
+```
 _setup.bat
+```
+
+You may also call `_setup.bat` via command line and provide parameters to automate the installation process:
+```
+CMD /C _setup.bat MYSERVICEPASSWORD MYSERVICELOGIN MYSERVICENAME MYSERVICELABEL
+```
 
 # FAQ
 
