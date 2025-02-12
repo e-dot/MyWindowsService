@@ -98,6 +98,9 @@ XCOPY /Y/D/S "$(TargetDir)*.exe" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.bat" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.ps1" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.pdb" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+
+IF "$(ConfigurationName)" == "Release" powershell.exe Compress-Archive -Path '$(MSBuildProjectDirectory)\build\$(Platform)\*.*' -DestinationPath '$(MSBuildProjectDirectory)\build\$(MSBuildProjectName)-$(Platform).zip' -Force
+
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -133,6 +136,9 @@ XCOPY /Y/D/S "$(TargetDir)*.exe" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.bat" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.ps1" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.pdb" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+
+IF "$(ConfigurationName)" == "Release" powershell.exe Compress-Archive -Path '$(MSBuildProjectDirectory)\build\$(Platform)\*.*' -DestinationPath '$(MSBuildProjectDirectory)\build\$(MSBuildProjectName)-$(Platform).zip' -Force
+
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -164,6 +170,9 @@ XCOPY /Y/D/S "$(TargetDir)*.exe" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.bat" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.ps1" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.pdb" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+
+IF "$(ConfigurationName)" == "Release" powershell.exe Compress-Archive -Path '$(MSBuildProjectDirectory)\build\$(Platform)\*.*' -DestinationPath '$(MSBuildProjectDirectory)\build\$(MSBuildProjectName)-$(Platform).zip' -Force
+
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -199,6 +208,9 @@ XCOPY /Y/D/S "$(TargetDir)*.exe" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.bat" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.ps1" "$(MSBuildProjectDirectory)\build\$(Platform)\"
 XCOPY /Y/D/S "$(TargetDir)*.pdb" "$(MSBuildProjectDirectory)\build\$(Platform)\"
+
+IF "$(ConfigurationName)" == "Release" powershell.exe Compress-Archive -Path '$(MSBuildProjectDirectory)\build\$(Platform)\*.*' -DestinationPath '$(MSBuildProjectDirectory)\build\$(MSBuildProjectName)-$(Platform).zip' -Force
+
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
