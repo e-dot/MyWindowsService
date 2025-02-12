@@ -51,3 +51,4 @@ CMD /C _setup.bat MYSERVICEPASSWORD MYSERVICELOGIN MYSERVICENAME MYSERVICELABEL
 * [sc.exe config](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-config)
 * [se.exe start](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc742126(v=ws.11))
 * [se.exe stop](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc742107(v=ws.11))
+* [Service Control Manager (SCM)](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/cc756382(v=ws.10))
