@@ -57,8 +57,8 @@ IF NOT EXIST "%SERVICE_EXE%" GOTO EXE_NOT_FOUND
 IF NOT EXIST "%SERVICE_PATH%_start.bat" GOTO START_BAT_NOT_FOUND
 IF NOT EXIST "%SERVICE_PATH%_stop.bat" GOTO STOP_BAT_NOT_FOUND
 
-ECHO [%TIME%] %~n0 : Creation d'un fichier de configuration
 SET SERVICE_CONFIG=%SERVICE_PATH%%SERVICE_NAME%.config
+ECHO [%TIME%] %~n0 : Configuration file creation "%SERVICE_CONFIG%"...
 TYPE NUL >"%SERVICE_CONFIG%" || GOTO ERROR
 ECHO SERVICE_PATH=%SERVICE_PATH% >>"%SERVICE_CONFIG%" || GOTO ERROR
 ECHO SERVICE_NAME=%SERVICE_NAME% >>"%SERVICE_CONFIG%" || GOTO ERROR
@@ -79,6 +79,9 @@ SC CREATE "%SERVICE_NAME%" binPath= "%SERVICE_EXE%"%SERVICE_OPTIONS% DisplayName
 REM Configure error handling for service : automatically restart twice (then stops)
 ECHO [%TIME%] %~n0 : Configuring service "%SERVICE_NAME%" to restart twice on failure...
 SC FAILURE "%SERVICE_NAME%" reset= 86400 actions= restart/10000/restart/10000// || GOTO ERROR
+
+REM Pause while service is being created
+timeout 5 >nul
 
 REM Start service
 ECHO [%TIME%] %~n0 : Starting service "%SERVICE_NAME%"...

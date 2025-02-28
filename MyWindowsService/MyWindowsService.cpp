@@ -16,24 +16,25 @@ wchar_t* strDefaultStopCommand1 = (LPWSTR)TEXT("cmd.exe /C ");
 wchar_t* strDefaultStopCommand2 = (LPWSTR)TEXT("_stop.bat");
 wchar_t strWorkingDirectory[MAX_PATH];
 wchar_t strExecutableName[MAX_PATH];
-wchar_t* strLogDirectory = (LPWSTR)TEXT(".");
+wchar_t strLogPrefix[MAX_PATH];
+wchar_t strLogFile[MAX_PATH];
+wchar_t strErrorFile[MAX_PATH];
 HANDLE hEventSource = NULL;
 std::wostream *pMyCout = &std::wcout;
 std::wostream *pMyCerr = &std::wcerr;
 wchar_t strConfigurationFile[MAX_PATH];
-std::unordered_map<std::string, std::string> Configuration;
+std::unordered_map<std::wstring, std::wstring> Configuration;
 
 SERVICE_STATUS          gSvcStatus;
 SERVICE_STATUS_HANDLE   gSvcStatusHandle;
 HANDLE                  ghSvcStopEvent = NULL;
 
-VOID SvcInstall(void);
 VOID WINAPI SvcCtrlHandler(DWORD);
 VOID WINAPI SvcMain(DWORD, LPTSTR*);
 
 VOID ReportSvcStatus(DWORD, DWORD, DWORD);
 VOID SvcInit(DWORD, LPTSTR*);
-VOID SvcReportEvent(LPTSTR);
+VOID SvcReportEvent(LPCWSTR);
 
 //
 // Purpose: 
@@ -56,50 +57,109 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
   LogInfo(TEXT("executableName = \"") << strExecutableName << TEXT("\"") << L'\n');
   LogInfo(TEXT("workingDirectory = \"") << strWorkingDirectory << TEXT("\"") << L'\n');
 
+  // By default we log into current working directory (unless another directory is specified in configuration file)
+  Configuration[L"SERVICE_LOG_FOLDER"] = strWorkingDirectory;
+
+  // By default the service name (id) is the executable name
+  Configuration[L"SERVICE_NAME"] = strExecutableName;
+
   // Build configuration file path
   strConfigurationFile[0] = _T('\0');
   wcscat_s(strConfigurationFile, sizeof(strConfigurationFile) / sizeof(wchar_t), strWorkingDirectory);
   wcscat_s(strConfigurationFile, sizeof(strConfigurationFile) / sizeof(wchar_t), strExecutableName);
   wcscat_s(strConfigurationFile, sizeof(strConfigurationFile) / sizeof(wchar_t), L".config");
 
-  // Load configuration file
-  std::ifstream configurationFile(strConfigurationFile);
-  if (!configurationFile.is_open()) {
-    LogError(TEXT("Can't open configuration file \"") << strConfigurationFile << TEXT("\") : ") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
-    return 1;
-  }
-
-  // Build start command full path : part1 + working directory + '_start.bat'
+  // Build default start command full path : part1 + working directory + '_start.bat'
   strStartCommand[0] = _T('\0');
   wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strDefaultStartCommand1);
   wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strWorkingDirectory);
   wcscat_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), strDefaultStartCommand2);
-  // Build stop command full path : part1 + working directory + '_stop.bat'
+  Configuration[L"SERVICE_START_COMMAND"] = strStartCommand;
+  // Build default stop command full path : part1 + working directory + '_stop.bat'
   strStopCommand[0] = _T('\0');
   wcscat_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), strDefaultStopCommand1);
   wcscat_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), strWorkingDirectory);
   wcscat_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), strDefaultStopCommand2);
-  // TODO Load configuration file
+  Configuration[L"SERVICE_STOP_COMMAND"] = strStopCommand;
 
-  LogInfo(TEXT("startCommand = \"") << strStartCommand << TEXT("\"") << L'\n');
-  LogInfo(TEXT("stopCommand = \"") << strStopCommand << TEXT("\"") << L'\n');
+  // Load configuration file (to override defaults)
+  LogInfo(L"Loading configuration file \"" << strConfigurationFile << L"\"..." << L'\n');
+  std::wifstream configurationFile(strConfigurationFile);
+  if (!configurationFile.is_open()) {
+    LogError(TEXT("Can't open configuration file \"") << strConfigurationFile << TEXT("\") : ") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
+    return 1;
+  }
+  std::wstring configLine;
+  while (std::getline(configurationFile, configLine)) {
+    std::wistringstream is_line(configLine);
+    std::wstring key, value;
+
+    // Read key and value (separator is the equal sign '=')
+    if (std::getline(std::getline(is_line, key, L'='), value)) {
+      // Trim value : remove spaces at the beginning and at the end
+      trim(value);
+      Configuration[key] = value;
+    }
+  }
+  configurationFile.close();
+
+  // Afficher les valeurs lues
+  LogInfo(TEXT(".config[") << L"SERVICE_NAME" << TEXT("] = \"") << Configuration[L"SERVICE_NAME"] << TEXT("\"") << L'\n');
+  LogInfo(TEXT(".config[") << L"SERVICE_LABEL" << TEXT("] = \"") << Configuration[L"SERVICE_LABEL"] << TEXT("\"") << L'\n');
+  LogInfo(TEXT(".config[") << L"SERVICE_PATH" << TEXT("] = \"") << Configuration[L"SERVICE_PATH"] << TEXT("\"") << L'\n');
+  LogInfo(TEXT(".config[") << L"SERVICE_LOGIN" << TEXT("] = \"") << Configuration[L"SERVICE_LOGIN"] << TEXT("\"") << L'\n');
+  LogInfo(TEXT(".config[") << L"SERVICE_LOG_FOLDER" << TEXT("] = \"") << Configuration[L"SERVICE_LOG_FOLDER"] << TEXT("\"") << L'\n');
+
+  // Build prefix for log and error files : log folder + '\\' + year + month + date + '.' + service name
+  wcscpy_s(strLogPrefix, sizeof(strLogPrefix) / sizeof(wchar_t), Configuration[L"SERVICE_LOG_FOLDER"].c_str());
+  if (Configuration[L"SERVICE_LOG_FOLDER"].back() != L'\\') {
+    wcscat_s(strLogPrefix, sizeof(strLogPrefix) / sizeof(wchar_t), L"\\");
+  }
+  wcscat_s(strLogPrefix, sizeof(strLogPrefix) / sizeof(wchar_t), getCurrentDate().c_str());
+  wcscat_s(strLogPrefix, sizeof(strLogPrefix) / sizeof(wchar_t), L".");
+  wcscat_s(strLogPrefix, sizeof(strLogPrefix) / sizeof(wchar_t), Configuration[L"SERVICE_NAME"].c_str());
+  // Build log file name by appending '.log'
+  wcscpy_s(strLogFile, sizeof(strLogFile) / sizeof(wchar_t), strLogPrefix);
+  wcscat_s(strLogFile, sizeof(strLogFile) / sizeof(wchar_t), L".log");
+  LogInfo(TEXT("logFile = \"") << strLogFile << TEXT("\"") << L'\n');
+  // Build error file name by appending '.err'
+  wcscpy_s(strErrorFile, sizeof(strErrorFile) / sizeof(wchar_t), strLogPrefix);
+  wcscat_s(strErrorFile, sizeof(strErrorFile) / sizeof(wchar_t), L".err");
+  LogInfo(TEXT("errorFile = \"") << strErrorFile << TEXT("\"") << L'\n');
+
+  LogInfo(TEXT(".config[") << L"SERVICE_START_COMMAND" << TEXT("] = \"") << Configuration[L"SERVICE_START_COMMAND"] << TEXT("\"") << L'\n');
+  LogInfo(TEXT(".config[") << L"SERVICE_STOP_COMMAND" << TEXT("] = \"") << Configuration[L"SERVICE_STOP_COMMAND"] << TEXT("\"") << L'\n');
+  // Reset strStartCommand with loaded configuration
+  wcscpy_s(strStartCommand, sizeof(strStartCommand) / sizeof(wchar_t), Configuration[L"SERVICE_START_COMMAND"].c_str());
+  // Reset strStopCommand with loaded configuration
+  wcscpy_s(strStopCommand, sizeof(strStopCommand) / sizeof(wchar_t), Configuration[L"SERVICE_STOP_COMMAND"].c_str());
+  
+  std::wofstream logFile(strLogFile);
+  if (!logFile.is_open()) {
+    LogError(TEXT("Can't open log file \"") << strLogFile << TEXT("\") : ") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
+    return 1;
+  }
+  std::wofstream errorFile(strErrorFile);
+  if (!errorFile.is_open()) {
+    LogError(TEXT("Can't open error file \"") << strErrorFile << TEXT("\") : ") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
+    return 1;
+  }
+
+  // Redirect output and error to files
+  LogFileSet(logFile);
+  ErrorFileSet(errorFile);
+
+  LogInfo(L"Service " << Configuration[L"SERVICE_NAME"] << L" starting..." << L'\n');
+  LogInfo(L"Loaded configuration file \"" << strConfigurationFile << L"\"" << L'\n');
 
   // Change working directory (to same path as executable, if not specified in configuration file)
-  LogInfo(L"Change working directory..." << L'\n');
   if (_wchdir((const wchar_t*)strWorkingDirectory)) {
     LogError(TEXT("chdir(\"") << strWorkingDirectory << TEXT("\") failed (") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
     return 1;
   }
   LogInfo(TEXT("chdir(\"") << strWorkingDirectory << TEXT("\") : OK.") << L'\n');
 
-  // If command-line parameter is "install", install the service. 
-  // Otherwise, the service is probably being started by the SCM.
-  if (lstrcmpi(argv[1], TEXT("install")) == 0)
-  {
-    SvcInstall();
-    return 0;
-  }
-
+  LogFileFlush();
   // If command-line parameter is "debug", start the service directly (for debugging)
   if (lstrcmpi(argv[1], TEXT("debug")) == 0)
   {
@@ -120,79 +180,6 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
   {
     SvcReportEvent((LPWSTR)TEXT("StartServiceCtrlDispatcher"));
   }
-}
-
-//
-// Purpose: 
-//   Installs a service in the SCM database
-//
-// Parameters:
-//   None
-// 
-// Return value:
-//   None
-//
-VOID SvcInstall()
-{
-  SC_HANDLE schSCManager;
-  SC_HANDLE schService;
-  wchar_t szUnquotedPath[MAX_PATH];
-
-  if (!GetModuleFileName(NULL, szUnquotedPath, MAX_PATH))
-  {
-    LogError(TEXT("Cannot install service (") << CFormatMessage(GetLastError()).GetFullText() << L'\n');
-    return;
-  }
-
-  // In case the path contains a space, it must be quoted so that
-  // it is correctly interpreted. For example,
-  // "d:\my share\myservice.exe" should be specified as
-  // ""d:\my share\myservice.exe"".
-  wchar_t szPath[MAX_PATH];
-  StringCbPrintf(szPath, MAX_PATH, TEXT("\"%s\""), szUnquotedPath);
-
-  // Get a handle to the SCM database. 
-
-  schSCManager = OpenSCManager(
-    NULL,                    // local computer
-    NULL,                    // ServicesActive database 
-    SC_MANAGER_ALL_ACCESS);  // full access rights 
-
-  if (NULL == schSCManager)
-  {
-    LogError(TEXT("OpenSCManager failed (") << CFormatMessage(GetLastError()).GetFullText() << TEXT(").") << L'\n');
-    return;
-  }
-
-  // Create the service
-
-  schService = CreateService(
-    schSCManager,              // SCM database 
-    strServiceName,                   // name of service 
-    strServiceLabel,                   // service name to display 
-    SERVICE_ALL_ACCESS,        // desired access 
-    SERVICE_WIN32_OWN_PROCESS, // service type 
-    SERVICE_DEMAND_START,      // start type 
-    SERVICE_ERROR_NORMAL,      // error control type 
-    szPath,                    // path to service's binary 
-    NULL,                      // no load ordering group 
-    NULL,                      // no tag identifier 
-    NULL,                      // no dependencies 
-    NULL,                      // LocalSystem account 
-    NULL);                     // no password 
-
-  if (schService == NULL)
-  {
-    LogError(TEXT("CreateService failed (") << CFormatMessage(GetLastError()).GetFullText() << TEXT(").") << L'\n');
-    CloseServiceHandle(schSCManager);
-    return;
-  }
-  else {
-    LogInfo(TEXT("Service installed successfully") << L'\n');
-  }
-
-  CloseServiceHandle(schService);
-  CloseServiceHandle(schSCManager);
 }
 
 //
@@ -322,12 +309,14 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
     case WAIT_OBJECT_0 + 0:
     {
       LogInfo(TEXT("Service sub-process PID ") << pi.dwProcessId << TEXT(" terminated.") << L'\n');
+      LogFileFlush();
 
       // Check sub-process exit code - if not 0 propagate error
       DWORD exitCode = 0;
       if (GetExitCodeProcess(pi.hProcess, &exitCode)) {
         if (exitCode == 0) {
           LogInfo(TEXT("Service sub-process PID ") << pi.dwProcessId << TEXT(" terminated with exit code ") << exitCode << L'\n');
+          LogFileFlush();
         }
         else {
           LogError(TEXT("Service sub-process PID ") << pi.dwProcessId << TEXT(" failed with exit code ") << exitCode << L'\n');
@@ -338,6 +327,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
       }
       else {
         LogInfo(TEXT("Can't get exit code for service sub-process PID ") << pi.dwProcessId << TEXT(" (") << CFormatMessage(GetLastError()).GetFullText() << L'\n');
+        LogFileFlush();
       }
     }
     break;
@@ -345,6 +335,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
     // ghEvents[1] was signaled (someone requested service to shut down)
     case WAIT_OBJECT_0 + 1:
       LogInfo(TEXT("Service shutdown requested.") << L'\n');
+      LogFileFlush();
       // if service stop is request, call the strStopCommand
       CallStopCommand(pi.dwProcessId);
       // stop infinite loop
@@ -364,6 +355,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
   CloseHandle(pi.hThread);
 
   ReportSvcStatus(SERVICE_STOPPED, dwServiceExitCode, 0);
+  LogFileFlush();
   return;
 }
 
@@ -454,17 +446,17 @@ VOID WINAPI SvcCtrlHandler(DWORD dwCtrl)
 // Remarks:
 //   The service must have an entry in the Application event log.
 //
-VOID SvcReportEvent(LPTSTR szFunction)
+VOID SvcReportEvent(LPCWSTR szFunction)
 {
   HANDLE hEventSource;
-  LPCTSTR lpszStrings[2];
+  LPCWSTR lpszStrings[2];
   wchar_t Buffer[80];
 
   hEventSource = RegisterEventSource(NULL, strServiceName);
 
   if (NULL != hEventSource)
   {
-    StringCchPrintf(Buffer, 80, TEXT("%s failed with %S"), szFunction, CFormatMessage(GetLastError()).GetFullText());
+    StringCchPrintf(Buffer, 80, L"%ls failed with %ls", szFunction, CFormatMessage(GetLastError()).GetFullText());
 
     lpszStrings[0] = strServiceName;
     lpszStrings[1] = Buffer;
@@ -594,6 +586,7 @@ DWORD CallStopCommand(DWORD dwRunningProcessId) {
   }
 
   LogInfo(TEXT("CreateProcess(\"") << strStopCommand << TEXT("\") : PID=") << pi.dwProcessId);
+  LogFileFlush();
 
   DWORD dwStopCommandWaitTimeout = 500000; // TODO use a parameter from configuration file
   DWORD dwServiceExitCode = NO_ERROR;
@@ -607,12 +600,14 @@ DWORD CallStopCommand(DWORD dwRunningProcessId) {
   case WAIT_OBJECT_0:
   {
     LogInfo(TEXT("Stop command sub-process PID ") << pi.dwProcessId << TEXT(" terminated.") << L'\n');
+    LogFileFlush();
 
     // Check sub-process exit code - if not 0 propagate error
     DWORD exitCode = 0;
     if (GetExitCodeProcess(pi.hProcess, &exitCode)) {
       if (exitCode == 0) {
         LogInfo(TEXT("Stop command sub-process PID ") << pi.dwProcessId << TEXT(" terminated with exit code ") << exitCode << L'\n');
+        LogFileFlush();
       }
       else {
         LogError(TEXT("Stop command sub-process PID ") << pi.dwProcessId << TEXT("failed with exit code ") << exitCode << L'\n');
@@ -642,6 +637,47 @@ DWORD CallStopCommand(DWORD dwRunningProcessId) {
   CloseHandle(pi.hThread);
 
   // TODO TerminateProcess(dwRunningProcessId); to workaround stop failure - kill process and all its children
-
+  LogFileFlush();
   return dwServiceExitCode;
+}
+
+// trim from start (in place)
+inline void ltrim(std::wstring& s) {
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](wchar_t ch) {
+    return !std::isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+inline void rtrim(std::wstring& s) {
+  s.erase(std::find_if(s.rbegin(), s.rend(), [](wchar_t ch) {
+    return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+// trim from both ends (in place)
+inline void trim(std::wstring& s) {
+  rtrim(s);
+  ltrim(s);
+}
+
+std::wstring getCurrentDate(std::wstring strSeparator) {
+  // Obtenir le temps actuel
+  std::time_t now = std::time(nullptr);
+
+  // Structure tm pour stocker les composants de la date
+  std::tm tmBuffer;
+
+  // Format de sortie : séparateur personnalisable (par défaut : rien!)
+  std::wstring dateFormat = L"%Y" + strSeparator + L"%m" + strSeparator + L"%d";
+
+  // Convertir le temps en structure tm de manière sécurisée
+  if (localtime_s(&tmBuffer, &now) == 0) {
+    // Créer un flux pour formater la date
+    std::wostringstream oss;
+    oss << std::put_time(&tmBuffer, dateFormat.c_str());
+    return oss.str();
+  } else {
+    return L"";
+  }
 }

@@ -11,18 +11,34 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <iomanip>
+#include <chrono>
+#include <ctime>
 
 #include "MyWindowsServiceMessage.h"
 #include "FormatMessage.h"
 
 #define LogInfo(x) \
   if (pMyCout) { \
-    *pMyCout << x; \
+    *pMyCout << L"[" << getCurrentDate(L"-") << L"] " << x; \
   }
 #define LogError(x) \
-  if (pMyCout) { \
-    *pMyCout << x; \
+  if (pMyCerr) { \
+    *pMyCerr << L"[" << getCurrentDate(L"-") << L"] " << x; \
   }
+#define LogFileFlush() \
+  if (pMyCout) { \
+    pMyCout->flush(); \
+  }
+#define LogFileSet(f) \
+  if (pMyCout) { \
+    pMyCout = &f; \
+  }
+#define ErrorFileSet(f) \
+  if (pMyCerr) { \
+    pMyCerr = &f; \
+  }
+
 const _TCHAR* GetFileName(_TCHAR * strDirNameBuffer, size_t intDirNameBufferSize, const _TCHAR * strFullPathName, const _TCHAR cDirectorySeparator = _T('\\'), const _TCHAR cExtensionSeparator = _T('.'));
 const _TCHAR* GetDirectoryName(_TCHAR * strDirNameBuffer, size_t intDirNameBufferSize, const _TCHAR * strFullPathName, const _TCHAR cDirectorySeparator = _T('\\'));
 const _TCHAR* GetCurrentExecutableDirectoryAndFileName(_TCHAR * strDirNameBuffer, size_t intDirNameBufferSize, _TCHAR * strExecutableFileName, size_t intExecutableFileName);
@@ -45,3 +61,9 @@ private:
   std::wostream& m_os1;
   std::wostream& m_os2;
 };
+
+inline void ltrim(std::wstring& s);
+inline void rtrim(std::wstring& s);
+inline void trim(std::wstring& s);
+
+std::wstring getCurrentDate(std::wstring strSeparator = L"");
