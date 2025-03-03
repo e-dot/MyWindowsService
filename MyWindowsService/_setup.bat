@@ -8,6 +8,7 @@ SET SERVICE_LOGIN=%~2
 SET SERVICE_NAME=%~3
 SET SERVICE_LABEL=%~4
 SET SERVICE_LOG_FOLDER=%~5
+SET SERVICE_AUTOSTART=%~6
 IF "%SERVICE_PASSWORD%" == "help" GOTO USAGE
 IF "%SERVICE_PASSWORD%" == "--help" GOTO USAGE
 
@@ -83,9 +84,11 @@ SC FAILURE "%SERVICE_NAME%" reset= 86400 actions= restart/10000/restart/10000// 
 REM Pause while service is being created
 timeout 5 >nul
 
+IF NOT "%SERVICE_AUTOSTART%" == "AUTOSTART" GOTO POST_AUTOSTART
 REM Start service
 ECHO [%TIME%] %~n0 : Starting service "%SERVICE_NAME%"...
 SC START "%SERVICE_NAME%" || GOTO ERROR
+:POST_AUTOSTART
 
 :END
 ECHO [%TIME%] %~n0 : End.
