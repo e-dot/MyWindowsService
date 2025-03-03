@@ -34,7 +34,6 @@ VOID WINAPI SvcMain(DWORD, LPTSTR*);
 
 VOID ReportSvcStatus(DWORD, DWORD, DWORD);
 VOID SvcInit(DWORD, LPTSTR*);
-VOID SvcReportEvent(LPCWSTR);
 
 //
 // Purpose: 
@@ -49,6 +48,7 @@ VOID SvcReportEvent(LPCWSTR);
 int __cdecl _tmain(int argc, wchar_t* argv[])
 {
   LogInfo(L"Start service..." << L'\n');
+  SvcReportEvent(L"Start service...");
 
   // Load default configuration
   LogInfo(L"Load configuration..." << L'\n');
@@ -178,7 +178,7 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
   };
   if (!StartServiceCtrlDispatcher(DispatchTable))
   {
-    SvcReportEvent((LPWSTR)TEXT("StartServiceCtrlDispatcher"));
+    SvcReportEvent((LPWSTR)TEXT("StartServiceCtrlDispatcher"), GetLastError());
   }
 }
 
@@ -205,7 +205,7 @@ VOID WINAPI SvcMain(DWORD dwArgc, LPTSTR* lpszArgv)
 
   if (!gSvcStatusHandle)
   {
-    SvcReportEvent((LPWSTR)TEXT("RegisterServiceCtrlHandler"));
+    SvcReportEvent((LPWSTR)TEXT("RegisterServiceCtrlHandler"), GetLastError());
     return;
   }
 
@@ -289,6 +289,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
   }
 
   LogInfo(TEXT("CreateProcess(\"") << strStartCommand << TEXT("\") : PID=") << pi.dwProcessId << L'\n');
+  SvcReportEvent(L"Service started.");
 
   const size_t nCount = 2;
   HANDLE ghEvents[nCount];
@@ -354,6 +355,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
   CloseHandle(pi.hProcess);
   CloseHandle(pi.hThread);
 
+  SvcReportEvent(L"Service stopped.");
   ReportSvcStatus(SERVICE_STOPPED, dwServiceExitCode, 0);
   LogFileFlush();
   return;
@@ -415,6 +417,7 @@ VOID WINAPI SvcCtrlHandler(DWORD dwCtrl)
   switch (dwCtrl)
   {
   case SERVICE_CONTROL_STOP:
+    SvcReportEvent(L"Service stop received...");
     ReportSvcStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
 
     // Signal the service to stop.
@@ -446,25 +449,33 @@ VOID WINAPI SvcCtrlHandler(DWORD dwCtrl)
 // Remarks:
 //   The service must have an entry in the Application event log.
 //
-VOID SvcReportEvent(LPCWSTR szFunction)
+VOID SvcReportEvent(LPCWSTR szFunction, DWORD reportErrorCode)
 {
   HANDLE hEventSource;
   LPCWSTR lpszStrings[2];
-  wchar_t Buffer[80];
+  wchar_t Buffer[4096];
+  WORD eventType = EVENTLOG_SUCCESS;
+  DWORD eventId = SVC_INFO;
 
   hEventSource = RegisterEventSource(NULL, strServiceName);
 
   if (NULL != hEventSource)
   {
-    StringCchPrintf(Buffer, 80, L"%ls failed with %ls", szFunction, CFormatMessage(GetLastError()).GetFullText());
+    if (reportErrorCode == NO_ERROR) {
+      StringCchPrintf(Buffer, sizeof(Buffer) / sizeof(wchar_t), L"%ls", szFunction);
+    } else {
+      eventType = EVENTLOG_ERROR_TYPE;
+      eventId = SVC_ERROR;
+      StringCchPrintf(Buffer, sizeof(Buffer) / sizeof(wchar_t), L"%ls failed with error %ls", szFunction, CFormatMessage(reportErrorCode).GetFullText());
+    }
 
     lpszStrings[0] = strServiceName;
     lpszStrings[1] = Buffer;
 
     ReportEvent(hEventSource,        // event log handle
-      EVENTLOG_ERROR_TYPE, // event type
+      eventType, // event type
       0,                   // event category
-      SVC_ERROR,           // event identifier
+      eventId,           // event identifier
       NULL,                // no security identifier
       2,                   // size of lpszStrings array
       0,                   // no binary data

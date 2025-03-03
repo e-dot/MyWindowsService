@@ -67,3 +67,4 @@ inline void rtrim(std::wstring& s);
 inline void trim(std::wstring& s);
 
 std::wstring getCurrentDate(std::wstring strSeparator = L"");
+VOID SvcReportEvent(LPCWSTR, DWORD = NO_ERROR);

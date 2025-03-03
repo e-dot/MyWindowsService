@@ -231,29 +231,21 @@ IF "$(ConfigurationName)" == "Release" powershell.exe Compress-Archive -Path '$(
     <CustomBuild Include="MyWindowsServiceMessage.mc">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mc.exe -U %(Filename).mc
-rc -r %(Filename).rc
-link -machine:$(LibrariesArchitecture) -dll -noentry -out:%(Filename).dll %(Filename).res
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mc.exe -U %(Filename).mc
-rc -r %(Filename).rc
-link -machine:$(LibrariesArchitecture) -dll -noentry -out:%(Filename).dll %(Filename).res
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mc.exe -U %(Filename).mc
-rc -r %(Filename).rc
-link -machine:$(LibrariesArchitecture) -dll -noentry -out:%(Filename).dll %(Filename).res
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mc.exe -U %(Filename).mc
-rc -r %(Filename).rc
-link -machine:$(LibrariesArchitecture) -dll -noentry -out:%(Filename).dll %(Filename).res
 </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compile messages...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MyWindowsServiceMessage.h;MyWindowsServiceMessage.rc;MyWindowsServiceMessage.res;MyWindowsServiceMessage.dll;MSG00409.bin;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MyWindowsServiceMessage.h;MyWindowsServiceMessage.rc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compile messages...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MyWindowsServiceMessage.h;MyWindowsServiceMessage.rc;MyWindowsServiceMessage.res;MyWindowsServiceMessage.dll;MSG00409.bin;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MyWindowsServiceMessage.h;MyWindowsServiceMessage.rc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compile messages...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MyWindowsServiceMessage.h;MyWindowsServiceMessage.rc;MyWindowsServiceMessage.res;MyWindowsServiceMessage.dll;MSG00409.bin;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MyWindowsServiceMessage.h;MyWindowsServiceMessage.rc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compile messages...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MyWindowsServiceMessage.h;MyWindowsServiceMessage.rc;MyWindowsServiceMessage.res;MyWindowsServiceMessage.dll;MSG00409.bin;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MyWindowsServiceMessage.h;MyWindowsServiceMessage.rc;%(Outputs)</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -261,6 +253,7 @@ link -machine:$(LibrariesArchitecture) -dll -noentry -out:%(Filename).dll %(File
     <Text Include="_stop.bat" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MSG00409.bin" />
     <None Include="_setup.bat" />
     <None Include="_stop.ps1" />
   </ItemGroup>
