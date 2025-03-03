@@ -11,3 +11,5 @@ MyWindowsService/MyWindowsServiceMessage.rc
 MyWindowsService/MyWindowsServiceMessage.res
 MyWindowsService/build/Win32
 MyWindowsService/build/x64
+/MyWindowsService/build/x64
+/MyWindowsService/build/Win32
