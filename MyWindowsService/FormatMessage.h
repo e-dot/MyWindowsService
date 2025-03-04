@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <string>
 
-const wchar_t* formatMessage(DWORD dwErrorCode);
 class CFormatMessage {
 public:
   CFormatMessage(DWORD dwErrorCode);
