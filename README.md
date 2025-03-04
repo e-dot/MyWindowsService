@@ -7,7 +7,7 @@ A Windows Service is a program that starts automatically at boot. It can be stop
 
 # Install
 
-* Download the package (zip) :
+* Download the package (zip) : https://github.com/e-dot/MyWindowsService/raw/refs/heads/main/MyWindowsService/build/MyWindowsService-x64.zip
 
 * Unzip in a folder
 
@@ -61,6 +61,6 @@ CMD /C _setup.bat MYSERVICEPASSWORD MYSERVICELOGIN MYSERVICENAME MYSERVICELABEL
 * [sc.exe query](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-query)
 * [sc.exe create](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-create)
 * [sc.exe config](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-config)
-* [se.exe start](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc742126(v=ws.11))
-* [se.exe stop](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc742107(v=ws.11))
+* [sc.exe start](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc742126(v=ws.11))
+* [sc.exe stop](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc742107(v=ws.11))
 * [Service Control Manager (SCM)](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/cc756382(v=ws.10))
