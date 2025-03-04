@@ -9,6 +9,6 @@ MyWindowsService/MyWindowsServiceMessage.dll
 MyWindowsService/MyWindowsServiceMessage.h
 MyWindowsService/MyWindowsServiceMessage.rc
 MyWindowsService/MyWindowsServiceMessage.res
-MyWindowsService/build/Win32/
-MyWindowsService/build/x64/
+MyWindowsService/MyWindowsService/build/Win32/
+MyWindowsService/MyWindowsService/build/x64/
 MyWindowsService/MyWindowsService.aps
