@@ -254,6 +254,7 @@ IF "$(ConfigurationName)" == "Release" powershell.exe Compress-Archive -Path '$(
   </ItemGroup>
   <ItemGroup>
     <None Include="MSG00409.bin" />
+    <None Include="MSG0040C.bin" />
     <None Include="_setup.bat" />
     <None Include="_stop.ps1" />
   </ItemGroup>
