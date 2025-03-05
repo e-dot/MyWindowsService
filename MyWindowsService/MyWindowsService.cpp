@@ -1,5 +1,3 @@
-// $Id: MyWindowsService.cpp 88962 2025-01-28 16:22:18Z emmanuelka $
-
 #include "MyWindowsService.h"
 
 #pragma comment(lib, "advapi32.lib")
@@ -161,7 +159,7 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
 
   LogFileFlush();
   // If command-line parameter is "debug", start the service directly (for debugging)
-  if (lstrcmpi(argv[1], TEXT("debug")) == 0)
+  if (argc > 1 && lstrcmpi(argv[1], TEXT("debug")) == 0)
   {
     SvcInit(argc, argv);
     return 0;
@@ -486,10 +484,8 @@ VOID SvcReportEvent(LPCWSTR szFunction, DWORD reportErrorCode)
   }
 }
 
-const _TCHAR* GetDirectoryName(_TCHAR* strDirNameBuffer, size_t intDirNameBufferSize, const _TCHAR* strFullPathName, const _TCHAR cDirectorySeparator)
+void GetDirectoryName(_TCHAR* strDirNameBuffer, size_t intDirNameBufferSize, const _TCHAR* strFullPathName, const _TCHAR cDirectorySeparator)
 {
-  const _TCHAR* strDirName = NULL;
-
   if (strFullPathName != NULL)
   {
     const _TCHAR* strFileNameStart = _tcsrchr(strFullPathName, (int)cDirectorySeparator);
@@ -497,7 +493,6 @@ const _TCHAR* GetDirectoryName(_TCHAR* strDirNameBuffer, size_t intDirNameBuffer
     {
       // Aucun séparateur de répertoire: on utilise le chemin relatif "répertoire courant" = "."
       wcscpy_s(strDirNameBuffer, intDirNameBufferSize, _T(".\\"));
-      strDirName = strDirNameBuffer;
     }
     else
     {
@@ -509,17 +504,12 @@ const _TCHAR* GetDirectoryName(_TCHAR* strDirNameBuffer, size_t intDirNameBuffer
       }
       wcsncpy_s(strDirNameBuffer, intDirNameBufferSize, strFullPathName, nDirectorySize);
       strDirNameBuffer[nDirectorySize] = _T('\0');
-      strDirName = strDirNameBuffer;
     }
   }
-
-  return(strDirName);
 }
 
-const _TCHAR* GetFileName(_TCHAR* strExecutableFileNameBuffer, size_t intExecutableFileNameBufferSize, const _TCHAR* strFullPathName, const _TCHAR cDirectorySeparator, const _TCHAR cExtensionSeparator)
+void GetFileName(_TCHAR* strExecutableFileNameBuffer, size_t intExecutableFileNameBufferSize, const _TCHAR* strFullPathName, const _TCHAR cDirectorySeparator, const _TCHAR cExtensionSeparator)
 {
-  const _TCHAR* strFileName = NULL;
-
   if (strFullPathName != NULL)
   {
     // Search last folder separator in full path (reverse search)
@@ -528,7 +518,6 @@ const _TCHAR* GetFileName(_TCHAR* strExecutableFileNameBuffer, size_t intExecuta
     {
       // No separator found : use default binary name DEFAULT_SVCNAME
       wcscpy_s(strExecutableFileNameBuffer, intExecutableFileNameBufferSize, DEFAULT_SVCNAME);
-      strFileName = strExecutableFileNameBuffer;
     }
     else
     {
@@ -546,14 +535,11 @@ const _TCHAR* GetFileName(_TCHAR* strExecutableFileNameBuffer, size_t intExecuta
       }
       wcsncpy_s(strExecutableFileNameBuffer, intExecutableFileNameBufferSize, strFileNameStart + 1, nFileNameSize);
       strExecutableFileNameBuffer[nFileNameSize + 1] = _T('\0');
-      strFileName = strExecutableFileNameBuffer;
     }
   }
-
-  return(strFileName);
 }
 
-const _TCHAR* GetCurrentExecutableDirectoryAndFileName(_TCHAR* strDirNameBuffer, size_t intDirNameBufferSize, _TCHAR* strExecutableFileNameBuffer, size_t intExecutableFileNameBufferSize)
+void GetCurrentExecutableDirectoryAndFileName(_TCHAR* strDirNameBuffer, size_t intDirNameBufferSize, _TCHAR* strExecutableFileNameBuffer, size_t intExecutableFileNameBufferSize)
 {
   const _TCHAR* strDirectory = _T(".\\");
   const _TCHAR* strExecutable = _T("MyWindowsService.exe");
@@ -562,11 +548,12 @@ const _TCHAR* GetCurrentExecutableDirectoryAndFileName(_TCHAR* strDirNameBuffer,
   DWORD dwSize = GetModuleFileName(NULL, strModuleFileName, MAX_PATH);
   if (dwSize > 0)
   {
-    strDirectory = GetDirectoryName(strDirNameBuffer, intDirNameBufferSize, strModuleFileName);
-    strExecutable = GetFileName(strExecutableFileNameBuffer, intExecutableFileNameBufferSize, strModuleFileName);
+    GetDirectoryName(strDirNameBuffer, intDirNameBufferSize, strModuleFileName);
+    GetFileName(strExecutableFileNameBuffer, intExecutableFileNameBufferSize, strModuleFileName);
+  } else {
+    wcsncpy_s(strDirNameBuffer, intDirNameBufferSize, strDirectory, wcslen(strDirectory));
+    wcsncpy_s(strExecutableFileNameBuffer, intExecutableFileNameBufferSize, strExecutable, wcslen(strExecutable));
   }
-
-  return(strDirectory);
 }
 
 DWORD CallStopCommand(DWORD dwRunningProcessId) {

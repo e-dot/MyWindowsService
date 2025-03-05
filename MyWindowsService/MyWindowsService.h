@@ -1,4 +1,3 @@
-// $Id: WindowsService.h 88962 2025-01-28 16:22:18Z emmanuelka $
 #pragma once
 
 #include <windows.h>
@@ -39,9 +38,9 @@
     pMyCerr = &f; \
   }
 
-const _TCHAR* GetFileName(_TCHAR * strDirNameBuffer, size_t intDirNameBufferSize, const _TCHAR * strFullPathName, const _TCHAR cDirectorySeparator = _T('\\'), const _TCHAR cExtensionSeparator = _T('.'));
-const _TCHAR* GetDirectoryName(_TCHAR * strDirNameBuffer, size_t intDirNameBufferSize, const _TCHAR * strFullPathName, const _TCHAR cDirectorySeparator = _T('\\'));
-const _TCHAR* GetCurrentExecutableDirectoryAndFileName(_TCHAR * strDirNameBuffer, size_t intDirNameBufferSize, _TCHAR * strExecutableFileName, size_t intExecutableFileName);
+void GetFileName(_TCHAR * strDirNameBuffer, size_t intDirNameBufferSize, const _TCHAR * strFullPathName, const _TCHAR cDirectorySeparator = _T('\\'), const _TCHAR cExtensionSeparator = _T('.'));
+void GetDirectoryName(_TCHAR * strDirNameBuffer, size_t intDirNameBufferSize, const _TCHAR * strFullPathName, const _TCHAR cDirectorySeparator = _T('\\'));
+void GetCurrentExecutableDirectoryAndFileName(_TCHAR * strDirNameBuffer, size_t intDirNameBufferSize, _TCHAR * strExecutableFileName, size_t intExecutableFileName);
 DWORD CallStopCommand(DWORD dwRunningProcessId);
 class logStream {
 public:

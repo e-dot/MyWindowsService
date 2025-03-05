@@ -1,5 +1,7 @@
 MyWindowsService/MyWindowsService/x64/Release/
 MyWindowsService/MyWindowsService/Release/
+MyWindowsService/MyWindowsService/x64/Debug/
+MyWindowsService/MyWindowsService/Debug/
 MyWindowsService/.vs/
 MyWindowsService/MSG00409.bin
 MyWindowsService/MSG0040C.bin
