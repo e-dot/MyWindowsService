@@ -15,3 +15,11 @@ MyWindowsService/x64/Debug/_setup.bat
 MyWindowsService/x64/Debug/_start.bat
 /MyWindowsService/x64/Debug
 /MyWindowsService/x64/Release
+MyWindowsService/build/Win32/MyWindowsService.exe
+MyWindowsService/build/Win32/MyWindowsService.pdb
+MyWindowsService/build/x64/MyWindowsService.exe
+MyWindowsService/build/x64/MyWindowsService.pdb
+MyWindowsService/Release/MyWindowsService.exe
+MyWindowsService/Release/MyWindowsService.pdb
+MyWindowsService/x64/Release/MyWindowsService.exe
+MyWindowsService/x64/Release/MyWindowsService.pdb
