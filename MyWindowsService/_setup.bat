@@ -89,8 +89,13 @@ REG.EXE ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Appli
 REM EVENTLOG_ERROR_TYPE | EVENTLOG_WARNING_TYPE | EVENTLOG_INFORMATION_TYPE = 7
 REG.EXE ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\%SERVICE_NAME%" /v TypesSupported /t REG_DWORD /d "7" || GOTO ERROR
 
+REM TODO Create registry entries for GENERIC SERVICE NAME (MyWindowsService) : used BEFORE configuration file is loaded
+
+REM Send event "Service registered" into the Windows Application Event Log
+EVENTCREATE /T SUCCESS /L APPLICATION /ID 201 /D "Service %%SERVICE_NAME%% (%SERVICE_LABEL%) registered successfully."
+
 REM Pause while service is being created
-timeout 5 >nul
+timeout 1 >nul
 
 IF NOT "%SERVICE_AUTOSTART%" == "AUTOSTART" GOTO POST_AUTOSTART
 REM Start service

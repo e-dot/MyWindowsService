@@ -21,5 +21,5 @@ MyWindowsService/build/x64/MyWindowsService.exe
 MyWindowsService/build/x64/MyWindowsService.pdb
 MyWindowsService/Release/MyWindowsService.exe
 MyWindowsService/Release/MyWindowsService.pdb
-MyWindowsService/x64/Release/MyWindowsService.exe
-MyWindowsService/x64/Release/MyWindowsService.pdb
+MyWindowsService/MyWindowsService/x64/Release/MyWindowsService.exe
+MyWindowsService/MyWindowsService/x64/Release/MyWindowsService.pdb

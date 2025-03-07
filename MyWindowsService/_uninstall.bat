@@ -23,6 +23,9 @@ timeout 5 >nul
 REM Delete service
 SC DELETE "%SERVICE_NAME%" || GOTO ERROR
 
+REM Send event "Service unregistered" into the Windows Application Event Log (Note that since we delete registry entries below, full message mapping won't work, but message is still readable)
+EVENTCREATE /T SUCCESS /L APPLICATION /ID 201 /D "Service %SERVICE_NAME% (%SERVICE_LABEL%) uninstalled successfully."
+
 REM Delete registry entries for event message files (SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\[SERVICE_NAME]\\EventMessageFile = "%SERVICE_EXE%") - ignore errors
 ECHO [%TIME%] %~n0 : Deleting registry entries for event messages...
 REG.EXE DELETE "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\%SERVICE_NAME%" /f

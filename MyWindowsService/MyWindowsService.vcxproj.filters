@@ -67,5 +67,8 @@
     <None Include="MSG0040C.bin">
       <Filter>Fichiers de ressources</Filter>
     </None>
+    <None Include="_uninstall.bat">
+      <Filter>Fichiers sources</Filter>
+    </None>
   </ItemGroup>
 </Project>

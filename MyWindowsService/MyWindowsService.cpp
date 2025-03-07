@@ -4,14 +4,14 @@
 
 // Default Configuration
 #define DEFAULT_SVCNAME (LPWSTR)TEXT("MyWindowsService")
-wchar_t* strServiceName = DEFAULT_SVCNAME;
-wchar_t* strServiceLabel = DEFAULT_SVCNAME;
+wchar_t *strServiceName = DEFAULT_SVCNAME;
+wchar_t *strServiceLabel = DEFAULT_SVCNAME;
 wchar_t strStartCommand[32767];
-wchar_t* strDefaultStartCommand1 = (LPWSTR)TEXT("cmd.exe /C ");
-wchar_t* strDefaultStartCommand2 = (LPWSTR)TEXT("_start.bat");
+wchar_t *strDefaultStartCommand1 = (LPWSTR)TEXT("cmd.exe /C ");
+wchar_t *strDefaultStartCommand2 = (LPWSTR)TEXT("_start.bat");
 wchar_t strStopCommand[32767];
-wchar_t* strDefaultStopCommand1 = (LPWSTR)TEXT("cmd.exe /C ");
-wchar_t* strDefaultStopCommand2 = (LPWSTR)TEXT("_stop.bat");
+wchar_t *strDefaultStopCommand1 = (LPWSTR)TEXT("cmd.exe /C ");
+wchar_t *strDefaultStopCommand2 = (LPWSTR)TEXT("_stop.bat");
 wchar_t strWorkingDirectory[MAX_PATH];
 wchar_t strExecutableName[MAX_PATH];
 wchar_t strLogPrefix[MAX_PATH];
@@ -38,10 +38,10 @@ VOID SvcInit(DWORD, LPTSTR*);
 //   Entry point for the process
 //
 // Parameters:
-//   None
+//   Optionnal "debug" to run service in debug mode
 // 
 // Return value:
-//   None, defaults to 0 (zero)
+//   0 for succes, otherwise error code
 //
 int __cdecl _tmain(int argc, wchar_t* argv[])
 {
@@ -107,6 +107,9 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
   LogInfo(TEXT(".config[") << L"SERVICE_PATH" << TEXT("] = \"") << Configuration[L"SERVICE_PATH"] << TEXT("\"") << L'\n');
   LogInfo(TEXT(".config[") << L"SERVICE_LOGIN" << TEXT("] = \"") << Configuration[L"SERVICE_LOGIN"] << TEXT("\"") << L'\n');
   LogInfo(TEXT(".config[") << L"SERVICE_LOG_FOLDER" << TEXT("] = \"") << Configuration[L"SERVICE_LOG_FOLDER"] << TEXT("\"") << L'\n');
+
+  // Set service name for logging in Windows Event Log
+  strServiceName = _wcsdup(Configuration[L"SERVICE_NAME"].c_str());
 
   // Build prefix for log and error files : log folder + '\\' + year + month + date + '.' + service name
   wcscpy_s(strLogPrefix, sizeof(strLogPrefix) / sizeof(wchar_t), Configuration[L"SERVICE_LOG_FOLDER"].c_str());
