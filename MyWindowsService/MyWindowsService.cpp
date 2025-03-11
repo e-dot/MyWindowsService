@@ -494,12 +494,12 @@ void GetDirectoryName(_TCHAR* strDirNameBuffer, size_t intDirNameBufferSize, con
     const _TCHAR* strFileNameStart = _tcsrchr(strFullPathName, (int)cDirectorySeparator);
     if (strFileNameStart == NULL)
     {
-      // Aucun séparateur de répertoire: on utilise le chemin relatif "répertoire courant" = "."
+      // No separator: use relative path from "current folder" = "."
       wcscpy_s(strDirNameBuffer, intDirNameBufferSize, _T(".\\"));
     }
     else
     {
-      // On copie jusqu'avant le dernier séparateur de répertoire
+      // Copy until the last folder separator
       size_t nDirectorySize = strFileNameStart + 1 - strFullPathName;
       if (nDirectorySize > intDirNameBufferSize)
       {
@@ -663,22 +663,47 @@ inline void trim(std::wstring& s) {
 }
 
 std::wstring getCurrentDate(std::wstring strSeparator) {
-  // Obtenir le temps actuel
+  // Get current date/time
   std::time_t now = std::time(nullptr);
 
-  // Structure tm pour stocker les composants de la date
+  // tm structure to store date/time components
   std::tm tmBuffer;
 
-  // Format de sortie : séparateur personnalisable (par défaut : rien!)
+  // Output format: customizable separator (default : none "")
   std::wstring dateFormat = L"%Y" + strSeparator + L"%m" + strSeparator + L"%d";
 
-  // Convertir le temps en structure tm de manière sécurisée
+  // Convert time into local
   if (localtime_s(&tmBuffer, &now) == 0) {
-    // Créer un flux pour formater la date
+    // Create stream to output date
     std::wostringstream oss;
     oss << std::put_time(&tmBuffer, dateFormat.c_str());
+    // Return generated string
     return oss.str();
   } else {
+    return L"";
+  }
+}
+
+std::wstring getCurrentDateTime(std::wstring strDateSeparator, std::wstring strDateTimeSeparator, std::wstring strTimeSeparator)
+{
+  // Get current date/time
+  std::time_t now = std::time(nullptr);
+
+  // tm structure to store date/time components
+  std::tm tmBuffer;
+
+  // Output format: customizable separator (default : none "")
+  std::wstring dateFormat = L"%Y" + strDateSeparator + L"%m" + strDateSeparator + L"%d" + strDateTimeSeparator + L"%H" + strTimeSeparator + L"%M" + strTimeSeparator + L"%S";
+
+  // Convert time into local
+  if (localtime_s(&tmBuffer, &now) == 0) {
+    // Create stream to output date
+    std::wostringstream oss;
+    oss << std::put_time(&tmBuffer, dateFormat.c_str());
+    // Return generated string
+    return oss.str();
+  }
+  else {
     return L"";
   }
 }

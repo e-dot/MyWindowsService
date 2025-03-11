@@ -19,11 +19,11 @@
 
 #define LogInfo(x) \
   if (pMyCout) { \
-    *pMyCout << L"[" << getCurrentDate(L"-") << L"] " << x; \
+    *pMyCout << L"[" << getCurrentDateTime(L"-", L" ", L":") << L"] " << x; \
   }
 #define LogError(x) \
   if (pMyCerr) { \
-    *pMyCerr << L"[" << getCurrentDate(L"-") << L"] " << x; \
+    *pMyCerr << L"[" << getCurrentDateTime(L"-", L" ", L":") << L"] " << x; \
   }
 #define LogFileFlush() \
   if (pMyCout) { \
@@ -66,4 +66,5 @@ inline void rtrim(std::wstring& s);
 inline void trim(std::wstring& s);
 
 std::wstring getCurrentDate(std::wstring strSeparator = L"");
+std::wstring getCurrentDateTime(std::wstring strDateSeparator = L"", std::wstring strDateTimeSeparator = L"", std::wstring strTimeSeparator = L"");
 VOID SvcReportEvent(LPCWSTR, DWORD = NO_ERROR);
