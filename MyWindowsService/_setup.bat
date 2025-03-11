@@ -82,17 +82,25 @@ ECHO [%TIME%] %~n0 : Configuring service "%SERVICE_NAME%" to restart twice on fa
 SC FAILURE "%SERVICE_NAME%" reset= 86400 actions= restart/10000/restart/10000// || GOTO ERROR
 
 REM Create registry entries for event message files (SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\[SERVICE_NAME]\\EventMessageFile = "%SERVICE_EXE%")
-ECHO [%TIME%] %~n0 : Creating registry entries for event messages...
+ECHO [%TIME%] %~n0 : Creating registry entries for %SERVICE_NAME% event messages...
 REG.EXE DELETE "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\%SERVICE_NAME%" /f 1>NUL 2>NUL
 REG.EXE ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\%SERVICE_NAME%" || GOTO ERROR
 REG.EXE ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\%SERVICE_NAME%" /v EventMessageFile /t REG_EXPAND_SZ /d "%SERVICE_EXE%" || GOTO ERROR
 REM EVENTLOG_ERROR_TYPE | EVENTLOG_WARNING_TYPE | EVENTLOG_INFORMATION_TYPE = 7
 REG.EXE ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\%SERVICE_NAME%" /v TypesSupported /t REG_DWORD /d "7" || GOTO ERROR
 
-REM TODO Create registry entries for GENERIC SERVICE NAME (MyWindowsService) : used BEFORE configuration file is loaded
+REM Create registry entries for GENERIC SERVICE NAME (MyWindowsService) : used BEFORE configuration file is loaded
+SET DEFAULT_SERVICE_NAME=MyWindowsService
+ECHO [%TIME%] %~n0 : Creating registry entries for %DEFAULT_SERVICE_NAME% event messages...
+REG.EXE DELETE "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\%DEFAULT_SERVICE_NAME%" /f 1>NUL 2>NUL
+REG.EXE ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\%DEFAULT_SERVICE_NAME%" || GOTO ERROR
+REG.EXE ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\%DEFAULT_SERVICE_NAME%" /v EventMessageFile /t REG_EXPAND_SZ /d "%SERVICE_EXE%" || GOTO ERROR
+REM EVENTLOG_ERROR_TYPE | EVENTLOG_WARNING_TYPE | EVENTLOG_INFORMATION_TYPE = 7
+REG.EXE ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\%DEFAULT_SERVICE_NAME%" /v TypesSupported /t REG_DWORD /d "7" || GOTO ERROR
 
 REM Send event "Service registered" into the Windows Application Event Log
-EVENTCREATE /T SUCCESS /L APPLICATION /ID 201 /D "Service %%SERVICE_NAME%% (%SERVICE_LABEL%) registered successfully."
+EVENTCREATE /T SUCCESS /L APPLICATION /ID 201 /D "Service %SERVICE_NAME% (%SERVICE_LABEL%) registered successfully."
+EVENTCREATE /T SUCCESS /L APPLICATION /ID 201 /D "Service %DEFAULT_SERVICE_NAME% (%SERVICE_LABEL%) registered successfully."
 
 REM Pause while service is being created
 timeout 1 >nul
