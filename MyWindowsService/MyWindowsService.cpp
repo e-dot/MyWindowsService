@@ -84,7 +84,9 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
   LogInfo(L"Loading configuration file \"" << strConfigurationFile << L"\"..." << L'\n');
   std::wifstream configurationFile(strConfigurationFile);
   if (!configurationFile.is_open()) {
-    LogError(TEXT("Can't open configuration file \"") << strConfigurationFile << TEXT("\") : ") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
+    DWORD lastError = GetLastError();
+    LogError(TEXT("Can't open configuration file \"") << strConfigurationFile << TEXT("\") : ") << CFormatMessage(lastError).GetFullText() << TEXT(")") << L'\n');
+    SvcReportEvent((LPWSTR)TEXT("Can't open configuration file"), lastError);
     return 1;
   }
   std::wstring configLine;
@@ -137,12 +139,16 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
   
   std::wofstream logFile(strLogFile);
   if (!logFile.is_open()) {
-    LogError(TEXT("Can't open log file \"") << strLogFile << TEXT("\") : ") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
+    DWORD lastError = GetLastError();
+    LogError(TEXT("Can't open log file \"") << strLogFile << TEXT("\") : ") << CFormatMessage(lastError).GetFullText() << TEXT(")") << L'\n');
+    SvcReportEvent((LPWSTR)TEXT("Can't open log file"), lastError);
     return 1;
   }
   std::wofstream errorFile(strErrorFile);
   if (!errorFile.is_open()) {
-    LogError(TEXT("Can't open error file \"") << strErrorFile << TEXT("\") : ") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
+    DWORD lastError = GetLastError();
+    LogError(TEXT("Can't open error file \"") << strErrorFile << TEXT("\") : ") << CFormatMessage(lastError).GetFullText() << TEXT(")") << L'\n');
+    SvcReportEvent((LPWSTR)TEXT("Can't open error file"), lastError);
     return 1;
   }
 
@@ -155,7 +161,9 @@ int __cdecl _tmain(int argc, wchar_t* argv[])
 
   // Change working directory (to same path as executable, if not specified in configuration file)
   if (_wchdir((const wchar_t*)strWorkingDirectory)) {
-    LogError(TEXT("chdir(\"") << strWorkingDirectory << TEXT("\") failed (") << CFormatMessage(GetLastError()).GetFullText() << TEXT(")") << L'\n');
+    DWORD lastError = GetLastError();
+    LogError(TEXT("chdir(\"") << strWorkingDirectory << TEXT("\") failed (") << CFormatMessage(lastError).GetFullText() << TEXT(")") << L'\n');
+    SvcReportEvent((LPWSTR)TEXT("Can't change working directory"), lastError);
     return 1;
   }
   LogInfo(TEXT("chdir(\"") << strWorkingDirectory << TEXT("\") : OK.") << L'\n');
